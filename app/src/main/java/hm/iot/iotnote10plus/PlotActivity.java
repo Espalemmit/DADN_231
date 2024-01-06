@@ -67,7 +67,7 @@ public class PlotActivity extends AppCompatActivity {
     // Get the chart view from the layout
     LineChart lineChartTemperature, lineChartHumidity, lineChartIntensity;
     Button generate, btnReset;
-    String username = "nathan0793";
+    String username = "datxichma";
     ArrayList<String> feedKeys = new ArrayList<>();
     private List<Entry> entries;
     private LineDataSet dataSet;
@@ -127,30 +127,30 @@ public class PlotActivity extends AppCompatActivity {
 
         cbIntensity.setOnCheckedChangeListener((compoundButton, b) -> {
             if (b){
-                feedKeys.add("adc-intensity");
+                feedKeys.add("cambien2");
                 lineChartIntensity.setVisibility(View.VISIBLE);
             } else {
-                feedKeys.remove("adc-intensity");
+                feedKeys.remove("cambien2");
                 lineChartIntensity.setVisibility(View.GONE);
             }
         });
         cbTemperature.setOnCheckedChangeListener((compoundButton, b) -> {
             if (b){
-                feedKeys.add("adc-temperature");
+                feedKeys.add("cambien1");
                 lineChartTemperature.setVisibility(View.VISIBLE);
 
             } else {
-                feedKeys.remove("adc-temperature");
+                feedKeys.remove("cambien1");
                 lineChartTemperature.setVisibility(View.GONE);
             }
         });
         cbHumidity.setOnCheckedChangeListener((compoundButton, b) -> {
             if (b){
-                feedKeys.add("adc-humidity");
+                feedKeys.add("cambien3");
                 lineChartHumidity.setVisibility(View.VISIBLE);
 
             } else {
-                feedKeys.remove("adc-humidity");
+                feedKeys.remove("cambien3");
                 lineChartHumidity.setVisibility(View.GONE);
             }
         });
@@ -360,7 +360,7 @@ public class PlotActivity extends AppCompatActivity {
             url += "?start_time=" + modifyAdafruitDate(startDate) + "T" + startTime.getText().toString() + "Z";
             url += "&" + "end_time=" + modifyAdafruitDate(endDate) + "T" + endTime.getText().toString() + "Z";
 //            String finalUrl = url;
-            String finalUrl ="https://io.adafruit.com/api/v2/nathan0793/feeds/adc-temperature/data/chart?start_time=2023-04-09T00:00:00Z&end_time=2023-04-09T24:00:00Z";
+            String finalUrl ="https://io.adafruit.com/api/v2/datxichma/feeds/cambien1/data/chart?start_time=2023-04-09T00:00:00Z&end_time=2023-04-09T24:00:00Z";
             JsonObjectRequest request = new JsonObjectRequest(
                     Request.Method.GET, finalUrl, null, new Response.Listener<JSONObject>() {
                 @Override
@@ -383,13 +383,13 @@ public class PlotActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
                     switch (feedKey) {
-                        case "adc-temperature":
+                        case "cambien1":
                             drawLineChart(dates, values, lineChartTemperature);
                             break;
-                        case "adc-humidity":
+                        case "cambien3":
                             drawLineChart(dates, values, lineChartHumidity);
                             break;
-                        case "adc-intensity":
+                        case "cambien2":
                             drawLineChart(dates, values, lineChartIntensity);
                             break;
                     }
@@ -466,17 +466,17 @@ public class PlotActivity extends AppCompatActivity {
                 SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
                 Log.d("TEST", topic + "***" + message.toString() +"***"+ inputFormat.format(date));
 
-                if (isFunctionEnabled && topic.contains("adc-temperature")) {
+                if (isFunctionEnabled && topic.contains("cambien1")) {
                     String s = message.toString();
                     float value = Float.parseFloat(s);
                     addEntry(day, value, lineChartTemperature);
                 }
-                if (isFunctionEnabled && topic.contains("adc-intensity")) {
+                if (isFunctionEnabled && topic.contains("cambien2")) {
                     String s = message.toString();
                     float value = Float.parseFloat(s);
                     addEntry(day, value, lineChartIntensity);
                 }
-                if (isFunctionEnabled && topic.contains("adc-humidity")) {
+                if (isFunctionEnabled && topic.contains("cambien3")) {
                     String s = message.toString();
                     float value = Float.parseFloat(s);
                     addEntry(day, value, lineChartHumidity);

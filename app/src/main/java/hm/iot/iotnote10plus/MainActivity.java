@@ -1,43 +1,32 @@
 package hm.iot.iotnote10plus;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
-
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.github.angads25.toggle.widget.LabeledSwitch;
-import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.data.LineDataSet;
-
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
-
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
+import java.time.LocalDate;
 import java.util.Date;
-import java.util.List;
-import java.util.TimeZone;
-import java.util.Timer;
-import java.util.TimerTask;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import java.time.LocalTime;
+import java.time.ZoneId;
 
 public class MainActivity extends AppCompatActivity {
-
     MQTTHelper mqttHelper;
     TextView txtTemperature, txtHumidity, txtIntensity;
     LabeledSwitch btnLED, btnPUMP;
-    List<Entry> entries = new ArrayList<>();
-    LineDataSet dataSet = new LineDataSet(entries, "Label");
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
 
         txtTemperature = findViewById(R.id.txtTemperature);
         txtIntensity = findViewById(R.id.txtIntensity);
@@ -62,18 +51,17 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
         btnLED.setOnToggledListener((toggleableView, isOn) -> {
-            btnLED.setEnabled(false);
             if(isOn){
-                sendDataMQTT("nathan0793/feeds/btnled", "1",3);
+                sendDataMQTT("datxichma/feeds/nutnhan1", "1",0);
             } else{
-                sendDataMQTT("nathan0793/feeds/btnled", "0",3);
+                sendDataMQTT("datxichma/feeds/nutnhan1", "0",0);
             }
         });
         btnPUMP.setOnToggledListener((toggleableView, isOn) -> {
             if(isOn){
-                sendDataMQTT("nathan0793/feeds/btnbump", "1",0);
+                sendDataMQTT("datxichma/feeds/nutnhan2", "1",0);
             } else{
-                sendDataMQTT("nathan0793/feeds/btnbump", "0",0);
+                sendDataMQTT("datxichma/feeds/nutnhan2", "0",0);
             }
         });
         startMQTT();
@@ -92,35 +80,6 @@ public class MainActivity extends AppCompatActivity {
         } catch (MqttException e) {
             e.printStackTrace();
         }
-
-        if(topic.equals("nathan0793/feeds/btnled")){
-            Timer timer = new Timer();
-            int remainingRetries = numberOfRetries - 1;
-            boolean remainingValue = Integer.parseInt(value) != 0;
-            // Check if the button is still disabled (meaning the ACK payload was not received)
-            if (!btnLED.isEnabled()) {
-                // Wait for the ACK payload for up to 3 seconds
-                timer.schedule(new TimerTask() {
-                    // Decrement the retry count
-                    public void run() {
-                        // If there are remaining retries, resend the message
-                        if (remainingRetries > 0) {
-                            sendDataMQTT("nathan0793/feeds/btnled", remainingValue ? "1" : "0", remainingRetries);
-                        }
-                        else {
-                            // If there are no more retries, revert the button state and re-enable it
-                            btnLED.setOn(!btnLED.isOn());
-                            btnLED.setEnabled(true);
-                            //Testcase: When ACK have not been returned, revert the button on server (In case of virtual device)
-                            sendDataMQTT("nathan0793/feeds/btnled", !remainingValue ? "1" : "0", remainingRetries);
-                        }
-                      }
-                },3000);
-            } else {
-                timer.cancel();
-            }
-        }
-
     }
 
     public void startMQTT(){
@@ -138,24 +97,52 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void messageArrived(String topic, MqttMessage message) {
+                FirebaseDatabase database = FirebaseDatabase.getInstance("https://fir-iot-note10plus-13f47-default-rtdb.asia-southeast1.firebasedatabase.app/");
+                DatabaseReference myRef = database.getReference();
                 Date date = new Date();
-                long day = date.getTime();
                 SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
                 Log.d("TEST", topic + "***" + message.toString() +"***"+ inputFormat.format(date));
+                LocalTime present = LocalTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
+                LocalDate presentDay = LocalDate.now(ZoneId.of("Asia/Ho_Chi_Minh"));
+                int gio = present.getHour();
+                int phut = present.getMinute();
+                int giay = present.getSecond();
+                int ngay = presentDay.getDayOfMonth();
+                int thang = presentDay.getMonthValue();
+                int nam = presentDay.getYear();
 
-                if(topic.contains("adc-temperature")) {
-                    String text = message.toString() + "°C";
+                String node = ngay + "-" + thang + "-" + nam + " " + gio + ":" + phut + ":" + giay;
+                if(topic.contains("cambien1")) {
+                    int tempValue = Integer.parseInt(message.toString());
+                    String text = message + "°C";
                     txtTemperature.setText(text);
+                    myRef.child(node).child("Nhiệt độ").setValue(tempValue);
                 }
-                else if (topic.contains("adc-humidity")) {
-                    String text = message.toString() + "%";
+                else if (topic.contains("cambien3")) {
+                    int humidValue = Integer.parseInt(message.toString());
+                    String text = message + "%";
                     txtHumidity.setText(text);
+                    myRef.child(node).child("Độ ẩm").setValue(humidValue);
+                    if(humidValue >= 50) {
+                        btnPUMP.setOn(false);
+                    }
+                    if(humidValue < 20) {
+                        btnPUMP.setOn(true);
+                    }
                 }
-                else if (topic.contains("adc-intensity")) {
-                    String text = message.toString() + "Lux";
+                else if (topic.contains("cambien2")) {
+                    int intensityValue = Integer.parseInt(message.toString());
+                    String text = message + "Lux";
                     txtIntensity.setText(text);
+                    myRef.child(node).child("Ánh sáng").setValue(intensityValue);
+                    if (intensityValue > 400) {
+                        btnLED.setOn(false); // Turn off the LED button
+                    }
+                    if (intensityValue < 50) {
+                        btnLED.setOn(true); // Turn off the LED button
+                    }
                 }
-                else if (topic.contains("ackled")){
+                else if (topic.contains("ai")){
                     if (!btnLED.isEnabled()) {
                         if (message.toString().equals("1")) {
                             btnLED.setEnabled(true);
@@ -165,10 +152,10 @@ public class MainActivity extends AppCompatActivity {
                         btnLED.setEnabled(true);
                     }
                 }
-                else if (topic.equals("nathan0793/feeds/btnbump")){
+                else if (topic.equals("datxichma/feeds/nutnhan2")){
                     btnPUMP.setOn(message.toString().equals("1"));
                 }
-                else if (topic.contains("nathan0793/feeds/btnled")){
+                else if (topic.contains("datxichma/feeds/nutnhan1")){
                     btnLED.setOn(message.toString().equals("1"));
                 }
             }

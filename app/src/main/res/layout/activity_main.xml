@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="#ffffff">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -26,6 +27,43 @@
             android:textColor="#ff0000"
             android:textSize="30sp"/>
     </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <!-- TextView to describe Temperature column -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="Nhiệt độ"
+            android:textColor="#000000"
+            android:textSize="16sp" />
+
+        <!-- TextView to describe Intensity column -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="Ánh sáng"
+            android:textColor="#000000"
+            android:textSize="16sp" />
+
+        <!-- TextView to describe Humidity column -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="Độ ẩm"
+            android:textColor="#000000"
+            android:textSize="16sp" />
+    </LinearLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -38,11 +76,12 @@
             android:layout_height="match_parent"
             android:layout_margin="10dp"
             android:layout_weight="1"
-            android:background="#91672C"
+            android:background="#ff0000"
             android:gravity="center"
             android:text="--°C"
             android:textSize="28sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:textColor="#ffffff"/>
         <TextView
             android:id="@+id/txtIntensity"
             android:text="--Lx"
@@ -50,9 +89,9 @@
             android:layout_height="match_parent"
             android:layout_margin="10dp"
             android:layout_weight="1"
-            android:background="#0000ff"
+            android:background="#ff7900"
             android:gravity="center"
-
+            android:textColor="#ffffff"
             android:textSize="28sp"
             android:textStyle="bold" />
         <TextView
@@ -64,10 +103,19 @@
             android:layout_weight="1"
             android:background="#0000ff"
             android:gravity="center"
-
+            android:textColor="#ffffff"
             android:textSize="28sp"
             android:textStyle="bold" />
     </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Công tắc máy bơm"
+        android:textSize="32sp"
+        android:textColor="#000000"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="10dp"/>
 
     <com.github.angads25.toggle.widget.LabeledSwitch
         android:id="@+id/btnPump"
@@ -85,6 +133,15 @@
         app:on="false"
         app:colorBorder="@color/colorAccent"/>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Công tắc đèn"
+        android:textSize="32sp"
+        android:textColor="#000000"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="10dp"/>
+
     <com.github.angads25.toggle.widget.LabeledSwitch
         android:id="@+id/btnLED"
         android:layout_width="match_parent"
@@ -100,5 +157,4 @@
         app:textOff = "OFF"
         app:on="false"
         app:colorBorder="@color/colorAccent"/>
-
 </LinearLayout>
